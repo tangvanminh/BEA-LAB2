@@ -1,0 +1,2 @@
+joystick.c:23:5:is_joy_pressed	16	static
+joystick.c:31:6:get_joystick	8	static
