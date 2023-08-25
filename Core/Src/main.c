@@ -47,7 +47,7 @@
 #define SERVICE_27		2
 #define SERVICE_2E		3
 
-#define CURRENT_SERVICE SERVICE_22
+#define CURRENT_SERVICE SERVICE_2E
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -153,8 +153,8 @@ void do_sv22(){
 }
 
 void do_sv2E(){
-	sprintf(buffer,"Received Value : %#04x %#04x %#04x %#04x %#04x %#04x",
-			dataStorage[5], dataStorage[6], dataStorage[7],dataStorage[8],dataStorage[9],dataStorage[10]);
+	sprintf(buffer,"%#04x %#04x %#04x %#04x %#04x %#04x",
+			dataStorage[5], dataStorage[6], dataStorage[7], dataStorage[8], dataStorage[9], dataStorage[10]);
 	ST7789_WriteString(10, 20, buffer, Font_7x10, WHITE, BLACK);
 	TxData[0] = 0x02;
 	TxData[1] = 0x6E;
@@ -263,6 +263,11 @@ int main(void)
 			  do_sv22();
 		  }
 		  break;
+	  case SERVICE_2E:
+		  if(dataflag){
+			  do_sv2E();
+		  }
+		  break;
 	  default:
 		  break;
 	  }
@@ -283,6 +288,35 @@ int main(void)
 			  }
 			  sprintf(buffer, "ADC Value: %ld", received);
 			  ST7789_WriteString(10, 40, buffer, Font_7x10, WHITE, BLACK);
+		  }
+		  break;
+	  case SERVICE_2E:
+		  if(is_joy_pressed(JOY_LEFT)){
+			  CFdata = 0xAA;
+			  joyPressed = 1;
+		  }
+		  if(is_joy_pressed(JOY_RIGHT)){
+			  CFdata = 0xFF;
+			  joyPressed = 1;
+		  }
+		  if(is_joy_pressed(JOY_CTR)){
+			  CFdata = 0x00;
+			  joyPressed = 1;
+		  }
+		  if(joyPressed){
+			  joyPressed = 0;
+			  TxData2[0] = 0x10;
+			  TxData2[1] = 0x09;
+			  TxData2[2] = 0x2E;
+			  TxData2[3] = 0xF0;
+			  TxData2[4] = 0x02;
+			  TxData2[5] = CFdata;
+			  TxData2[6] = CFdata;
+			  TxData2[7] = CFdata;
+			  HAL_CAN_AddTxMessage(&hcan2, &TxHeader2, TxData2, &TxMailbox2);
+		  }
+		  if(dataflag2){
+			  dataflag2 = 0;
 		  }
 		  break;
 	  default:
@@ -631,7 +665,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 					dataStorage[i] = RxData[i];
 				}
 			}
-			if(((dataStorage[0])&0xF0 )== 0x10){
+			if(((RxData[0])&0xF0 )== 0x10){
+				dataflag = 0;
 				isFf = 1;
 				TxData[0] = 0x30; 	//FT: flow control, Frame State: continue to send
 				TxData[1] = 0x08;	//BS: max 8 CFs till next FC
@@ -645,6 +680,15 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	if(hcan->Instance == CAN2){
 		if(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader2, RxData2)==HAL_OK){
 			dataflag2 = 1;
+			if(((RxData2[0])&0xF0 )== 0x30){
+				dataflag2 = 0;
+				isFf = 1;
+				TxData2[0] = 0x21; 	//FT: flow control, Frame State: continue to send
+				TxData2[1] = CFdata;
+				TxData2[2] = CFdata;
+				TxData2[3] = CFdata;
+				HAL_CAN_AddTxMessage(&hcan2, &TxHeader2, TxData2, &TxMailbox2);
+			}
 		}else{
 			Error_Handler();
 		}
