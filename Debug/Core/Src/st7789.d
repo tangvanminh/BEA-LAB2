@@ -1,4 +1,5 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/st7789.o: ../Core/Src/st7789.c ../Core/Inc/st7789.h \
+ ../Core/Inc/fonts.h ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -30,10 +31,11 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
- ../Core/Inc/joystick.h ../Core/Inc/main.h ../Core/Inc/software_timer.h \
- ../Core/Inc/LCD_driver.h ../Core/Inc/LCD_lib.h ../Core/Inc/LCD_lib.h \
- ../Core/Inc/fonts.h ../Core/Inc/st7789.h ../Core/Inc/fonts.h
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
+
+../Core/Inc/st7789.h:
+
+../Core/Inc/fonts.h:
 
 ../Core/Inc/main.h:
 
@@ -100,21 +102,3 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
-
-../Core/Inc/joystick.h:
-
-../Core/Inc/main.h:
-
-../Core/Inc/software_timer.h:
-
-../Core/Inc/LCD_driver.h:
-
-../Core/Inc/LCD_lib.h:
-
-../Core/Inc/LCD_lib.h:
-
-../Core/Inc/fonts.h:
-
-../Core/Inc/st7789.h:
-
-../Core/Inc/fonts.h:

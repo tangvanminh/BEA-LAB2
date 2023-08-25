@@ -5,11 +5,13 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/LCD_driver.c \
+../Core/Src/LCD_lib.c \
+../Core/Src/fonts.c \
 ../Core/Src/joystick.c \
-../Core/Src/lcd.c \
-../Core/Src/lcd_lib.c \
 ../Core/Src/main.c \
 ../Core/Src/software_timer.c \
+../Core/Src/st7789.c \
 ../Core/Src/stm32f4xx_hal_msp.c \
 ../Core/Src/stm32f4xx_it.c \
 ../Core/Src/syscalls.c \
@@ -17,11 +19,13 @@ C_SRCS += \
 ../Core/Src/system_stm32f4xx.c 
 
 OBJS += \
+./Core/Src/LCD_driver.o \
+./Core/Src/LCD_lib.o \
+./Core/Src/fonts.o \
 ./Core/Src/joystick.o \
-./Core/Src/lcd.o \
-./Core/Src/lcd_lib.o \
 ./Core/Src/main.o \
 ./Core/Src/software_timer.o \
+./Core/Src/st7789.o \
 ./Core/Src/stm32f4xx_hal_msp.o \
 ./Core/Src/stm32f4xx_it.o \
 ./Core/Src/syscalls.o \
@@ -29,11 +33,13 @@ OBJS += \
 ./Core/Src/system_stm32f4xx.o 
 
 C_DEPS += \
+./Core/Src/LCD_driver.d \
+./Core/Src/LCD_lib.d \
+./Core/Src/fonts.d \
 ./Core/Src/joystick.d \
-./Core/Src/lcd.d \
-./Core/Src/lcd_lib.d \
 ./Core/Src/main.d \
 ./Core/Src/software_timer.d \
+./Core/Src/st7789.d \
 ./Core/Src/stm32f4xx_hal_msp.d \
 ./Core/Src/stm32f4xx_it.d \
 ./Core/Src/syscalls.d \
