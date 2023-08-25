@@ -44,10 +44,10 @@
 #define NUM_OF_MAX_DATA_STORAGE	16
 
 #define SERVICE_22		1
-#define SERVICE_27		2
-#define SERVICE_2E		3
+#define SERVICE_2E		2
+#define SERVICE_27		3
 
-#define CURRENT_SERVICE SERVICE_2E
+#define CURRENT_SERVICE SERVICE_27
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -139,7 +139,7 @@ void rq_sv22(){
 void do_sv22(){
 	HAL_ADC_Start(&hadc1);
 	ADCValue = HAL_ADC_GetValue(&hadc1);
-	TxData[0] = 0x07;
+	TxData[0] = 0x07; //0 7
 	TxData[1] = 0x62;
 	TxData[2] = 0xF0;
 	TxData[3] = 0x01;
@@ -164,18 +164,30 @@ void do_sv2E(){
 }
 
 void do_sv27(){
-	ADCValue = HAL_ADC_GetValue(&hadc1);
-	TxData[0] = 0x07;
-	TxData[1] = 0x62;
-	TxData[2] = 0xF0;
-	TxData[3] = 0x01;
-
-	TxData[4] = ADCValue >> 24;
-	TxData[5] = ADCValue >> 16;
-	TxData[6] = ADCValue >> 8;
-	TxData[7] = ADCValue;
-
-	HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox);
+	if(seedRequested&&!keySent){
+		TxData[0] = 0x06;
+		TxData[1] = 0x67;
+		TxData[2] = 0x01;
+		TxData[3] = (rand()-1) % 0xFF + 1;
+		TxData[4] = (rand()-1) % 0xFF + 1;
+		TxData[5] = (rand()-1) % 0xFF + 1;
+		TxData[6] = (rand()-1) % 0xFF + 1;
+		HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox);
+	}else if(seedRequested&&keySent){
+		if((RxData[3] == TxData[3] + 1
+			&& RxData[4] == TxData[4] + 1)
+			&&(RxData[5] == TxData[5] + 1
+			&& RxData[6] == TxData[6] + 1))
+		{
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, SET);
+			TxData[0] = 0x02;
+			TxData[1] = 0x67;
+			TxData[2] = 0x02;
+			HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox);
+		}else{
+			HAL_Delay(10000);
+		}
+	}
 }
 
 /* USER CODE END 0 */
@@ -249,23 +261,42 @@ int main(void)
 
   sprintf(buffer, "HELLO WORLD");
   ST7789_WriteString(10, 20, buffer, Font_7x10, WHITE, BLACK);
-
+  int currentService = SERVICE_22;
   while (1)
   {
+	  if(is_joy_pressed(USER_BUTTON)){
+		  currentService++;
+		  if(currentService==4){
+			  currentService = 1;
+		  }
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 	  //todo:ECU
-	  switch(CURRENT_SERVICE){
+	  switch(currentService){
 	  case SERVICE_22:
+		  sprintf(buffer,"SERVICE 22");
+		  ST7789_WriteString(10, 200, buffer, Font_11x18, WHITE, BLACK);
 		  if(dataflag){
 			  dataflag = 0;
 			  do_sv22();
 		  }
 		  break;
 	  case SERVICE_2E:
+		  sprintf(buffer,"SERVICE 2E");
+		  ST7789_WriteString(10, 200, buffer, Font_11x18, WHITE, BLACK);
 		  if(dataflag){
+			  dataflag = 0;
 			  do_sv2E();
+		  }
+		  break;
+	  case SERVICE_27:
+		  sprintf(buffer,"SERVICE 27");
+		  ST7789_WriteString(10, 200, buffer, Font_11x18, WHITE, BLACK);
+		  if(dataflag){
+			  dataflag = 0;
+			  do_sv27();
 		  }
 		  break;
 	  default:
@@ -273,7 +304,7 @@ int main(void)
 	  }
 	  //todo: TESTER
 
-	  switch(CURRENT_SERVICE){
+	  switch(currentService){
 	  case SERVICE_22:
 		  if(timer0Flag){
 			  set_timer0(1000);
@@ -319,6 +350,28 @@ int main(void)
 			  dataflag2 = 0;
 		  }
 		  break;
+	  case SERVICE_27:
+		  if(!seedRequested){
+			  TxData2[0] = 0x02;
+			  TxData2[1] = 0x27;
+			  TxData2[2] = 0x01;
+			  HAL_CAN_AddTxMessage(&hcan2, &TxHeader2, TxData2, &TxMailbox2);
+			  seedRequested = 1;
+		  }else
+			  if(!keySent&&dataflag2){
+				  dataflag2 = 0;
+				  TxData2[0] = 0x06;
+				  TxData2[1] = 0x27;
+				  TxData2[2] = 0x02;
+				  TxData2[3] = RxData2[3] + 1;
+				  TxData2[4] = RxData2[4] + 1;
+				  TxData2[5] = RxData2[5] + 1;
+				  TxData2[6] = RxData2[6] + 1;
+				  HAL_CAN_AddTxMessage(&hcan2, &TxHeader2, TxData2, &TxMailbox2);
+				  keySent = 1;
+			  }
+		  break;
+
 	  default:
 		  break;
 	  }
@@ -625,6 +678,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : USER_Pin */
+  GPIO_InitStruct.Pin = USER_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(USER_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB0 PB2 PB7 PB8
                            PB9 */

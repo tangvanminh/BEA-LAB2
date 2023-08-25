@@ -10,10 +10,11 @@
 
 #include "main.h"
 
-#define NUMBER_OF_JOY 	3 //left, right, center is used
+#define NUMBER_OF_JOY 	4 //left, right, center is used
 #define JOY_CTR 		0
 #define JOY_LEFT 		1
 #define JOY_RIGHT 		2
+#define USER_BUTTON		3
 
 #define JOY_CTR_PIN		JOY_CTR_Pin
 #define JOY_LEFT_PIN	JOY_A_Pin

@@ -60,6 +60,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define JOY_CTR_Pin GPIO_PIN_13
 #define JOY_CTR_GPIO_Port GPIOC
+#define USER_Pin GPIO_PIN_1
+#define USER_GPIO_Port GPIOA
 #define JOY_A_Pin GPIO_PIN_4
 #define JOY_A_GPIO_Port GPIOC
 #define JOY_B_Pin GPIO_PIN_5

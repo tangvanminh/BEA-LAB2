@@ -97,4 +97,26 @@ void get_joystick(){
 			}
 		}
 	}
+
+	//user button
+	temp3[USER_BUTTON] = temp2[USER_BUTTON];
+	temp2[USER_BUTTON] = temp1[USER_BUTTON];
+	temp1[USER_BUTTON] = HAL_GPIO_ReadPin(USER_GPIO_Port, USER_Pin);
+
+	if((temp3[USER_BUTTON] == temp2[USER_BUTTON]) && (temp2[USER_BUTTON] == temp1[USER_BUTTON])){
+		if(joy_state[USER_BUTTON] != temp3[USER_BUTTON]){
+			joy_state[USER_BUTTON] = temp3[USER_BUTTON];
+
+			if(joy_state[USER_BUTTON] == PRESSED_STATE){
+				timeOutForKeyPress = TIME_OUT;
+				joy_flag[USER_BUTTON] = 1;
+			}
+		}else{
+			timeOutForKeyPress--;
+			if(timeOutForKeyPress == 0){
+				joy_state[USER_BUTTON] = NORMAL_STATE;
+			}
+		}
+	}
+
 }
